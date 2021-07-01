@@ -1,13 +1,7 @@
 const express = require('express')
 const path=require('path')
-const {notes, category} = require('./data')
 
 const PORT = process.env.PORT || 5000
-
-
-
-
-
 const app= express()
 app.use(express.json({extended: true}))
 app.use('/notes', require("./routes/notes.routes"))

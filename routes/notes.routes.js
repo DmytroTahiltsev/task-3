@@ -1,22 +1,13 @@
 const {Router} = require("express")
-let {notes, category} = require('../data')
+let {notes, category} = require('../repositories/data')
 const bodyParser = require("body-parser")
-const yup = require("yup")
+const {postSchema, patchSchema} = require("../services/validation")
+
 
 const router = Router()
 let urlencodedParser = bodyParser.urlencoded({extended: false})
 
-let postSchema = yup.object().shape({
-    name: yup.string().required(),
-    content: yup.string().required(),
-    category: yup.string().required(),
-    archived: yup.boolean().required()
-})
-let patchSchema = yup.object().shape({
-    name: yup.string(),
-    content: yup.string(),
-    category: yup.string()
-})
+
 
 router.get('/', (req, res) => {
     try{
