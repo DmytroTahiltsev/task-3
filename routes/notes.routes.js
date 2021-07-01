@@ -67,6 +67,7 @@ router.post('/', urlencodedParser, (req, res) => {
                 note.created = new Date()
                 notes.push(note)
                 return res.status(201).json({message:"Note added", notes})
+                
             }
             return res.status(400).json({message: "Некорректные данные"})
           })
