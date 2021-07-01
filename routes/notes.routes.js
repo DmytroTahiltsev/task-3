@@ -6,10 +6,16 @@ const yup = require("yup")
 const router = Router()
 let urlencodedParser = bodyParser.urlencoded({extended: false})
 
-let schema = yup.object().shape({
+let postSchema = yup.object().shape({
     name: yup.string().required(),
     content: yup.string().required(),
-    category: yup.string().required()
+    category: yup.string().required(),
+    archived: yup.boolean().required()
+})
+let patchSchema = yup.object().shape({
+    name: yup.string(),
+    content: yup.string(),
+    category: yup.string()
 })
 
 router.get('/', (req, res) => {
@@ -55,7 +61,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', urlencodedParser, (req, res) => {
     try{
-        schema.isValid(req.body)
+        postSchema.isValid(req.body)
         .then(function (valid) {
             if(valid){
                 const note = req.body
@@ -68,7 +74,6 @@ router.post('/', urlencodedParser, (req, res) => {
                 }
                 note.id = Date.now()
                 note.created = new Date()
-                note.archived = false
                 notes.push(note)
                 return res.status(201).json({message:"Note added", notes})
             }
@@ -90,9 +95,37 @@ router.delete('/:id', (req, res) => {
         }
         res.status(202).json({message: `Note with id = ${id} deleted`, notes})
     }catch(e){
-        res.status(500).json({message:"Что-то пошло не так"})
+        res.status(500).json({message:"Что-то пошло не так"}) 
     }
 
+})
+router.patch('/:id', (req, res) => {
+    try{
+        patchSchema.isValid(req.body)
+        .then(function (valid) {
+            if(valid){
+                const id = req.params.id
+                if(!notes.find(note => note.id == id)){
+                    return res.json({message: `There are no notes with ID = ${id}`, notes})
+                }
+                const editNote = req.body
+                const noteCategory = category.find(cat => cat.name.toUpperCase() == editNote.category.toUpperCase())
+                if(noteCategory){
+                    editNote.category = noteCategory
+                }
+                else{
+                    return res.status(400).json({message: "Недопустимая категория"})
+                }
+                notes = notes.map(note => {
+                    return note.id == id ? editNote : note
+                })
+                return res.status(201).json({message:"Note edited", notes})
+            }
+            return res.status(400).json({message: "Некорректные данные"})
+          })
+    }catch(e){
+        res.status(500).json({message:"Что-то пошло не так"}) 
+    }
 })
 
 module.exports = router
